@@ -20,6 +20,8 @@ import { AztecAddress, deriveSigningKey } from "@aztec/circuits.js";
 import { TokenContract } from "@aztec/noir-contracts.js";
 import { getInitialTestAccountsWallets } from "@aztec/accounts/testing";
 
+//
+
 const setupSandbox = async () => {
   const { PXE_URL = "http://localhost:8080" } = process.env;
   const pxe = await createPXEClient(PXE_URL);
