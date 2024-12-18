@@ -1,12 +1,6 @@
 use crate::test::utils;
-
-use dep::aztec::test::{helpers::{cheatcodes, test_environment::TestEnvironment}};
+use dep::aztec::oracle::{execution::get_block_number, storage::storage_read};
 use dep::aztec::protocol_types::storage::map::derive_storage_slot_in_map;
-use dep::aztec::note::note_getter::{MAX_NOTES_PER_PAGE, view_notes};
-use dep::aztec::note::note_viewer_options::NoteViewerOptions;
-use dep::aztec::hash::compute_secret_hash;
-
-use dep::aztec::{oracle::{execution::{get_block_number, get_contract_address}, unsafe_rand::unsafe_rand, storage::storage_read}};
 
 use crate::EasyPrivateVoting;
 
@@ -37,8 +31,7 @@ unconstrained fn test_end_vote() {
     let (env, voting_contract_address, admin) = utils::setup();
 
     env.impersonate(admin);
-    let call_interface = EasyPrivateVoting::at(voting_contract_address).end_vote();
-    env.call_public(call_interface);
+    EasyPrivateVoting::at(voting_contract_address).end_vote().call(&mut env.public());
 
     let vote_ended_expected = true;
 
@@ -54,8 +47,7 @@ unconstrained fn test_fail_end_vote_by_non_admin() {
     let alice = env.create_account();
 
     env.impersonate(alice);
-    let call_interface = EasyPrivateVoting::at(voting_contract_address).end_vote();
-    env.call_public(call_interface);
+    EasyPrivateVoting::at(voting_contract_address).end_vote().call(&mut env.public());
 }
 
 #[test]
@@ -66,8 +58,7 @@ unconstrained fn test_cast_vote() {
 
     let candidate = 1;
     env.advance_block_by(6);
-    let call_interface = EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate);
-    env.call_private_void(call_interface);
+    EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate).call(&mut env.private());
 
     // Read vote count from storage
     let block_number = get_block_number();
@@ -85,16 +76,14 @@ unconstrained fn test_cast_vote_with_separate_accounts() {
     let bob = env.create_account();
 
     let candidate = 101;
-    
+
     env.impersonate(alice);
     env.advance_block_by(1);
-    let call_interface = EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate);
-    env.call_private_void(call_interface);
+    EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate).call(&mut env.private());
 
     env.impersonate(bob);
     env.advance_block_by(1);
-    let call_interface = EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate);
-    env.call_private_void(call_interface);
+    EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate).call(&mut env.private());
 
     // Read vote count from storage
     let block_number = get_block_number();
@@ -111,14 +100,12 @@ unconstrained fn test_fail_vote_twice() {
     let alice = env.create_account();
 
     let candidate = 101;
-    
+
     env.impersonate(alice);
     env.advance_block_by(1);
-    let call_interface = EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate);
-    env.call_private_void(call_interface);
+    EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate).call(&mut env.private());
 
     // Vote again as alice
     env.advance_block_by(1);
-    let call_interface = EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate);
-    env.call_private_void(call_interface);
+    EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate).call(&mut env.private());
 }
