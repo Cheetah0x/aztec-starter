@@ -3,7 +3,7 @@ mod test;
 use dep::aztec::macros::aztec;
 
 #[aztec]
-contract EasyPrivateVoting {
+pub contract EasyPrivateVoting {
     use dep::aztec::{
         keys::getters::get_public_keys,
         macros::{functions::{initializer, internal, private, public}, storage::storage},
